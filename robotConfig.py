@@ -43,13 +43,18 @@ link_definition = {
 
 tip_definition = None
 
+
+# Use NUMBER_OF_LINKS to define how long the robot should be
+
+NUMBER_OF_LINKS = 20
 actuator_definition = {
-    "actuator_length": 2,
-    "n_segments": 10,
+    "actuator_length": NUMBER_OF_LINKS / 5,
+    "n_segments": NUMBER_OF_LINKS,
     "link_definition": link_definition,
     "joint_definitions": [joint_definition1, joint_definition2],
     "planar_flag": 0,
 }
+
 
 manipulator_definition = {
     "n_act": 1,
