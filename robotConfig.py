@@ -35,7 +35,7 @@ joint_definition2 = {
 link_definition = {
     "shape_type": "stadium",
     "dimensions": [0.2, 0.2, 0.2],
-    "mass": 0.350,
+    "mass": 35.0,
     "inertial_values": [1, 0, 0, 1, 0, 1],
     "material_color": [0.6, 0.0, 0.8, 1.0],
     "material_name": "green",
@@ -45,8 +45,9 @@ tip_definition = None
 
 
 # Use NUMBER_OF_LINKS to define how long the robot should be
+# some values dont work idk why
 
-NUMBER_OF_LINKS = 20
+NUMBER_OF_LINKS = 10
 actuator_definition = {
     "actuator_length": NUMBER_OF_LINKS / 5,
     "n_segments": NUMBER_OF_LINKS,
@@ -62,5 +63,5 @@ manipulator_definition = {
     "actuator_definitions": [actuator_definition],
     "tip_definition": tip_definition,
     "manipulator_name": "finger",
-    "urdf_filename": "finger.urdf",
+    "urdf_filename": "./URDFS/finger.urdf",
 }

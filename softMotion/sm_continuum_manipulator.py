@@ -69,6 +69,7 @@ class SMContinuumManipulator:
     def __init__(
         self,
         manipulator_definition: Union[SMManipulatorDefinition, Dict, str],
+        filename=""
     ):
 
         # assert that all arguments are of the right type.
@@ -85,9 +86,10 @@ class SMContinuumManipulator:
         self.manipulator_definition = manipulator_definition
 
         # create the urdf
-        self.manipulator_definition.urdf_filename = create_manipulator_urdf(
-            self.manipulator_definition
-        )
+        if filename:
+            self.manipulator_definition.urdf_filename = filename
+        else:
+            self.manipulator_definition.urdf_filename = create_manipulator_urdf(self.manipulator_definition)
 
         # turn of velocity_control
 
@@ -329,10 +331,11 @@ class SMContinuumManipulator:
         assert len(actuator_nrs) == len(
             axis_nrs
         ), f"actuator_nrs and axis_nrs have to have same length"
-
+        #import pdb; pdb.set_trace()
         self.apply_actuation_torques(
             actuator_nrs=actuator_nrs,
             axis_nrs=axis_nrs,
+            #axis_nrs=[0, 0, 0],
             actuation_torques=[0 for x in actuator_nrs],
             apply_zero_torques=False,
         )
@@ -346,7 +349,7 @@ class SMContinuumManipulator:
         """applies the actuation torque to all the joints that belong to axis in actuator.
         the same torque is applied to each of the joints.
         """
-
+        
         assert isinstance(actuator_nrs, list), f"actuator_nrs has to be a list of ints"
         assert isinstance(axis_nrs, list), f"axis_nrs has to be a list of ints"
         assert isinstance(
@@ -360,7 +363,7 @@ class SMContinuumManipulator:
         ), f"actuator_nrs and actuation_torques have to have same length"
 
         addressed_actuator_axis_pairs = []
-
+        #import pdb; pdb.set_trace()
         for actuator_nr, axis_nr, act_torque in zip(
             actuator_nrs, axis_nrs, actuation_torques
         ):

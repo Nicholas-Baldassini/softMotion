@@ -120,9 +120,10 @@ def create_scaled_shape_dimension_dict(
 ######### utilities to simplify setting up everything in pybullet #########
 
 
-def load_constrained_urdf(urdf_filename, startPos, startOrn, physicsClient):
+def load_constrained_urdf(urdf_filename, startPos, startOrn, physicsClient, static=0):
+    
     bodyUniqueId = p.loadURDF(
-        urdf_filename, startPos, startOrn, physicsClientId=physicsClient
+        urdf_filename, startPos, startOrn, physicsClientId=physicsClient, useFixedBase=static
     )
 
     constraintUniqueId = p.createConstraint(

@@ -10,5 +10,6 @@ def load_cylinders(bullet_client, positions, orientations):
             positions[i],
             orientations[i],
             physicsClient=bullet_client,
+            static=1
         )
     p.changeDynamics(cyl_id, -1, lateralFriction=2, physicsClientId=bullet_client)

@@ -7,12 +7,23 @@ from pynput import keyboard
 
 from softMotion.sm_continuum_manipulator import SMContinuumManipulator
 from softMotion.utils import load_constrained_urdf
+from softMotion.sm_manipulator_definition import SMManipulatorDefinition
 from robotConfig import manipulator_definition
 
 from simHelpers import simHelper
+from pathing import get_velocity_vector
 
 
-DURATION = 10000
+
+
+
+# Work on stiffing the robot
+# Add containing at base of the robot
+
+
+
+sys.path.append('./URDFS')
+
 GRAVITY = -9.8
 
 # Start pybullet sim
@@ -29,13 +40,17 @@ planeId = p.loadURDF("plane.urdf")
 StartOr = p.getQuaternionFromEuler([0, 0, 0])
 # To add more or less just append to this array below
 positions_c = [[-1, -1, 0.1], [0, -1, 0.1], [1, -1, 0.1], [-0.5, -2, 0.1], [0.5, -2, 0.1]]
+scale = 5
+positions_c = [[scale * i[0], scale * i[1], scale * i[2]] for i in positions_c]
 simHelper.load_cylinders(physicsClient, positions_c, [StartOr for _ in range(len(positions_c))])
 
 # Soft robot definition, to change its properties look at robotConfig.py
-finger = SMContinuumManipulator(manipulator_definition)
+#finger = SMContinuumManipulator(manipulator_definition, filename="")
+yml = SMManipulatorDefinition.from_file("./URDFS/benchmark_run_config.yaml")
+finger = SMContinuumManipulator(yml)
 finger.load_to_pybullet(
-    baseStartPos= [0, 2, 0.1],
-    baseStartOrn=p.getQuaternionFromEuler([-np.pi / 2, 0, np.pi]),
+    baseStartPos= [0, 10, 0.1],
+    baseStartOrn=p.getQuaternionFromEuler([-np.pi / 2, np.pi/2, np.pi]),
     baseConstraint="free",
     physicsClient=physicsClient,
 )
@@ -47,7 +62,8 @@ p.setTimeStep(time_step)
 
 lam, omega = 1.0, 1.0
 torque_fns = [
-    lambda t: 20 * np.sin(omega * t),
+    #lambda t: 20 * np.sin(omega * t),
+     0,
     lambda t: 20 * np.sin(omega * t - 1 * np.pi),
 ]  # - 0pi goes right, - pi goes left
 
@@ -55,30 +71,37 @@ real_time = time.time()
 normal_forces = normal_forces_lastLink = time_plot = np.zeros((n_steps,))
 
 
-force = [0.0, 0.0, 0.0]  
-
+velocity = [0.0, 0.0, 0.0]  
+torque = 0
+torque_multiplier = 10
 # Keyboard input, will be deleted soon
 def on_press(key):
     global force
+    global torque
 
     try:
-        print(str(key))
+       # print(str(key))
         if str(key) == "Key.up":
-            force = [0, 0, 100]
+            torque = torque_multiplier
+            #force[0] += 1# = [0, 0, 1]
         if str(key) == "Key.down":
-            force = [0, 0, -100]
+            torque = -torque_multiplier
+            #force[0] -= 1 #= [0, 0, -1]
         if str(key) == "Key.left":
-            force = [0, -100, 0]
+            velocity = [0, -5, 0]
+            #force[1] -= 1 #[0, -1, 0]
         if str(key) == "Key.right":
-            force = [0, 100, 0]
+            velocity = [0, 5, 0]
+            #force[1] +=  1#[0, 1, 0]
         
     except AttributeError:
         print('special key {0} pressed'.format(
             key))
+    print(force)
         
 def on_release(key):
-    print('{0} released'.format(
-        key))
+    #print('{0} released'.format(
+        #key))
     if key == keyboard.Key.esc:
         # Stop listener
         return False
@@ -87,24 +110,31 @@ on_press=on_press,
 on_release=on_release)
 listener.start()
 
-
+DURATION = 10000
 for i in range(DURATION):
     # Update robot physics stuff
-    finger.apply_actuation_torques(
-        actuator_nrs=[0], axis_nrs=[0], actuation_torques=[torque_fns[0](sim_time)]
-        )
-    finger.apply_actuation_torques(actuator_nrs=[0], axis_nrs=[1], actuation_torques=[0])
-
+    finger.apply_actuation_torques(actuator_nrs=[1, 2, 3], axis_nrs=[0, 0, 0], actuation_torques=[torque, torque, torque])
 
     p.stepSimulation()
     time.sleep(1./240.)
     
+    if torque_fns[0] < 100:
+        torque_fns[0] += 0.01
+    print(torque_fns[0])
     
     # At each frame apply an external force on the object
-    linvel, angvel = p.getBaseVelocity(finger.bodyUniqueId)
-    boxPos, boxOrn = p.getBasePositionAndOrientation(finger.bodyUniqueId)
-    p.applyExternalForce(objectUniqueId=finger.bodyUniqueId, linkIndex=-1,
-                         forceObj=force, posObj=boxPos, flags=p.WORLD_FRAME)
+    # linvel, angvel = p.getBaseVelocity(finger.bodyUniqueId)
+    # linvel = [round(x, 3) for x in linvel]
+    # boxPos, boxOrn = p.getBasePositionAndOrientation(finger.bodyUniqueId)
+    # p.applyExternalForce(objectUniqueId=finger.bodyUniqueId, linkIndex=-1,
+    #                      forceObj=force, posObj=boxPos, flags=p.WORLD_FRAME)
+    
+    #vel = get_velocity_vector(i/500)
+    #print(vel)
+    
+    #p.resetBaseVelocity(finger.bodyUniqueId, vel)
+    
+    p.resetBaseVelocity(finger.bodyUniqueId, velocity)
 
 
 p.disconnect()
