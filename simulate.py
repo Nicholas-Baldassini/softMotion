@@ -32,6 +32,9 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
 p.setGravity(0, 0, GRAVITY)
 p.setPhysicsEngineParameter(enableConeFriction=1)
 p.setRealTimeSimulation(0)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+p.resetDebugVisualizerCamera( cameraDistance=3, cameraYaw=0, cameraPitch=-85, cameraTargetPosition=[0,0,12])
+
 
 # load 
 planeId = p.loadURDF("plane.urdf")
@@ -73,7 +76,7 @@ normal_forces = normal_forces_lastLink = time_plot = np.zeros((n_steps,))
 
 velocity = [0.0, 0.0, 0.0]  
 torque = 0
-torque_multiplier = 7
+torque_multiplier = 5
 # Keyboard input, will be deleted soon
 def on_press(key):
     #global force
