@@ -73,11 +73,12 @@ normal_forces = normal_forces_lastLink = time_plot = np.zeros((n_steps,))
 
 velocity = [0.0, 0.0, 0.0]  
 torque = 0
-torque_multiplier = 10
+torque_multiplier = 7
 # Keyboard input, will be deleted soon
 def on_press(key):
-    global force
+    #global force
     global torque
+    global velocity
 
     try:
        # print(str(key))
@@ -97,7 +98,7 @@ def on_press(key):
     except AttributeError:
         print('special key {0} pressed'.format(
             key))
-    print(force)
+    #print(force)
         
 def on_release(key):
     #print('{0} released'.format(
@@ -118,9 +119,10 @@ for i in range(DURATION):
     p.stepSimulation()
     time.sleep(1./240.)
     
-    if torque_fns[0] < 100:
-        torque_fns[0] += 0.01
-    print(torque_fns[0])
+    # if torque_fns[0] < 100:
+    #     torque_fns[0] += 0.01
+    print(torque, velocity)
+    #print(torque_fns[0])
     
     # At each frame apply an external force on the object
     # linvel, angvel = p.getBaseVelocity(finger.bodyUniqueId)
