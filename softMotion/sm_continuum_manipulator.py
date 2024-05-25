@@ -172,6 +172,8 @@ class SMContinuumManipulator:
         # pdb.set_trace()
         # todo: write utility to suppress this output for merging link...
         # we dont want to print the info about merging the links... just clutters the console
+        
+        
         self.bodyUniqueId = p.loadURDF(
             self.manipulator_definition.urdf_filename,
             baseStartPos,
@@ -180,6 +182,8 @@ class SMContinuumManipulator:
             #useFixedBase=0,
             flags=all_flags,
         )
+        #import pdb; pdb.set_trace()
+        #bullet = p
 
         num_joints = p.getNumJoints(
             bodyUniqueId=self.bodyUniqueId, physicsClientId=self.physics_client

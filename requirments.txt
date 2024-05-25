@@ -4,3 +4,5 @@ matplotlib
 PyYAML
 pynput
 sympy
+pyyaml
+ruamel.yaml<0.18.0

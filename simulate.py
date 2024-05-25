@@ -47,18 +47,36 @@ scale = 5
 positions_c = [[scale * i[0], scale * i[1], scale * i[2]] for i in positions_c]
 simHelper.load_cylinders(physicsClient, positions_c, [StartOr for _ in range(len(positions_c))])
 
-# Soft robot definition, to change its properties look at robotConfig.py
+simHelper.load_container(physicsClient, [[1.05, 15, 0], [-1.05, 15, 0]], [p.getQuaternionFromEuler([0, 0, 0])] * 2)
+
+
+# Use robotConfig.py
 #finger = SMContinuumManipulator(manipulator_definition, filename="")
-yml = SMManipulatorDefinition.from_file("./URDFS/benchmark_run_config.yaml")
+
+# Create yaml config file
+simHelper.generate_config_yaml(10, 5, "URDFS/new.yaml")
+
+# Load yaml config file
+yml = SMManipulatorDefinition.from_file("./URDFS/new.yaml")
+
+# Create robot object
 finger = SMContinuumManipulator(yml)
+
 finger.load_to_pybullet(
-    baseStartPos= [0, 10, 0.1],
+    baseStartPos= [0, 28, 0.1],
     baseStartOrn=p.getQuaternionFromEuler([-np.pi / 2, np.pi/2, np.pi]),
     baseConstraint="free",
     physicsClient=physicsClient,
 )
+
 p.changeDynamics(finger.bodyUniqueId, -1, lateralFriction=2, restitution=1)
 
+import math
+limit_range = [-math.pi/6, math.pi/6]
+for i in range(p.getNumJoints(finger.bodyUniqueId)):
+    p.changeDynamics(finger.bodyUniqueId, i, jointLowerLimit=limit_range[0], jointUpperLimit=limit_range[1])
+    p.setJointMotorControl2(finger.bodyUniqueId, i, controlMode=p.VELOCITY_CONTROL, maxVelocity=2)
+    
 # Setup stuff from somo
 time_step, n_steps, sim_time = 0.001, 2000000, 0
 p.setTimeStep(time_step)
@@ -75,8 +93,10 @@ normal_forces = normal_forces_lastLink = time_plot = np.zeros((n_steps,))
 
 
 velocity = [0.0, 0.0, 0.0]  
+velocity_mult = 20
 torque = 0
 torque_multiplier = 5
+
 # Keyboard input, will be deleted soon
 def on_press(key):
     #global force
@@ -85,17 +105,17 @@ def on_press(key):
 
     try:
        # print(str(key))
-        if str(key) == "Key.up":
+        if str(key) == "Key.right":
             torque = torque_multiplier
             #force[0] += 1# = [0, 0, 1]
-        if str(key) == "Key.down":
+        if str(key) == "Key.left":
             torque = -torque_multiplier
             #force[0] -= 1 #= [0, 0, -1]
-        if str(key) == "Key.left":
-            velocity = [0, -5, 0]
+        if str(key) == "Key.down":
+            velocity = [0, -velocity_mult, 0]
             #force[1] -= 1 #[0, -1, 0]
-        if str(key) == "Key.right":
-            velocity = [0, 5, 0]
+        if str(key) == "Key.up":
+            velocity = [0, velocity_mult, 0]
             #force[1] +=  1#[0, 1, 0]
         
     except AttributeError:
@@ -114,10 +134,10 @@ on_press=on_press,
 on_release=on_release)
 listener.start()
 
-DURATION = 10000
+DURATION = 100000
 for i in range(DURATION):
     # Update robot physics stuff
-    finger.apply_actuation_torques(actuator_nrs=[1, 2, 3], axis_nrs=[0, 0, 0], actuation_torques=[torque, torque, torque])
+    finger.apply_actuation_torques(actuator_nrs=[1, 1, 1], axis_nrs=[0, 0, 0], actuation_torques=[torque, torque, torque])
 
     p.stepSimulation()
     time.sleep(1./240.)
