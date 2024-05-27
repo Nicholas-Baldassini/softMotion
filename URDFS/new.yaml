@@ -1,5 +1,5 @@
 manipulator_name:  "URDFS/cont_generated" 
-n_act: 10
+n_act: 20
 actuator_definitions:
 - &id001
   actuator_length: 2.5
@@ -39,6 +39,16 @@ actuator_definitions:
     spring_stiffness: 87.4286
     joint_neutral_position: 0
     joint_control_limit_force: 0.4
+- *id001
+- *id001
+- *id001
+- *id001
+- *id001
+- *id001
+- *id001
+- *id001
+- *id001
+- *id001
 - *id001
 - *id001
 - *id001

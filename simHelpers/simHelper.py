@@ -37,14 +37,14 @@ def generate_config_yaml(n_act, spacing, filename):
     #yaml.explicit_start = True
     
     
-    
+    n_segments = 5
     actuator_template = {
-     "actuator_length": 2.5,
-     "n_segments": 5,
+     "actuator_length": spacing,
+     "n_segments": n_segments,
      "planar_flag": 1,
      "link_definition": {
          "shape_type": "stadium",
-         "dimensions": [1., 1., 0.5],
+         "dimensions": [1., 1., spacing / n_segments],
          "mass": 0.00294,
          "inertial_values": [0.0152488, 0, 0, 0.0152488, 0, 0.0152488],
          "material_color": [0.10980392156862745, 0.3843137254901961, 0.8431372549019608, 1.0],

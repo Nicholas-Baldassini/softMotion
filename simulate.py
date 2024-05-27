@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import importlib, argparse, os, sys, time
 from pynput import keyboard
 
-from softMotion.sm_continuum_manipulator import SMContinuumManipulator
+from softMotion.sm_continuum_manipulator import SMContinuumManipulator, apply_actuation_torques
 from softMotion.utils import load_constrained_urdf
 from softMotion.sm_manipulator_definition import SMManipulatorDefinition
 from robotConfig import manipulator_definition
@@ -47,23 +47,26 @@ scale = 5
 positions_c = [[scale * i[0], scale * i[1], scale * i[2]] for i in positions_c]
 simHelper.load_cylinders(physicsClient, positions_c, [StartOr for _ in range(len(positions_c))])
 
-simHelper.load_container(physicsClient, [[1.05, 15, 0], [-1.05, 15, 0]], [p.getQuaternionFromEuler([0, 0, 0])] * 2)
+
+simHelper.load_container(physicsClient, [[1.05, 52, 0], [-1.05, 52, 0]], [p.getQuaternionFromEuler([0, 0, 0])] * 2)
 
 
 # Use robotConfig.py
 #finger = SMContinuumManipulator(manipulator_definition, filename="")
 
 # Create yaml config file
-simHelper.generate_config_yaml(10, 5, "URDFS/new.yaml")
+links_num = 20
+simHelper.generate_config_yaml(links_num, 2.5,  "URDFS/new.yaml")
 
 # Load yaml config file
+#yml = SMManipulatorDefinition.from_file("./URDFS/benchmark_run_config.yaml")
 yml = SMManipulatorDefinition.from_file("./URDFS/new.yaml")
 
 # Create robot object
 finger = SMContinuumManipulator(yml)
 
 finger.load_to_pybullet(
-    baseStartPos= [0, 28, 0.1],
+    baseStartPos= [0, 30 + links_num, 0.1],
     baseStartOrn=p.getQuaternionFromEuler([-np.pi / 2, np.pi/2, np.pi]),
     baseConstraint="free",
     physicsClient=physicsClient,
@@ -95,7 +98,7 @@ normal_forces = normal_forces_lastLink = time_plot = np.zeros((n_steps,))
 velocity = [0.0, 0.0, 0.0]  
 velocity_mult = 20
 torque = 0
-torque_multiplier = 5
+torque_multiplier = 0.17
 
 # Keyboard input, will be deleted soon
 def on_press(key):
@@ -135,12 +138,28 @@ on_release=on_release)
 listener.start()
 
 DURATION = 100000
+joints_num = p.getNumJoints(finger.bodyUniqueId)
 for i in range(DURATION):
     # Update robot physics stuff
-    finger.apply_actuation_torques(actuator_nrs=[1, 1, 1], axis_nrs=[0, 0, 0], actuation_torques=[torque, torque, torque])
+    #finger.apply_actuation_torques(actuator_nrs=[1, 1, 1], axis_nrs=[0, 0, 0], actuation_torques=[torque, torque, torque])
+    #import pdb; pdb.set_trace()
+    #print(p.getNumJoints(finger.bodyUniqueId))
+    #sys.exit(0)
+    
+    #print(p.getJointInfo(finger.bodyUniqueId, 50))
+    # p.setJointMotorControl2(
+    # bodyIndex=finger.bodyUniqueId,
+    # jointIndex=50,
+    # controlMode=p.TORQUE_CONTROL,
+    # force=torque,
+    # physicsClientId=physicsClient,
+    #     )
+    #apply_actuation_torques(finger.bodyUniqueId, [i for i in range(joints_num)], [torque for _ in range(joints_num)], lambda x: 0, physicsClient)
+    p.setJointMotorControlArray(finger.bodyUniqueId, [i for i in range(joints_num)], p.POSITION_CONTROL, targetPositions=[torque for _ in range(joints_num)])
+    
 
     p.stepSimulation()
-    time.sleep(1./240.)
+    time.sleep(1./480.)
     
     # if torque_fns[0] < 100:
     #     torque_fns[0] += 0.01

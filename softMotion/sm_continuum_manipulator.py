@@ -41,13 +41,15 @@ def apply_actuation_torques(
 
         passive_torque = passiveTorqueFn(jointState, **kwargs)
 
-        p.setJointMotorControl2(
-            bodyIndex=bodyIndex,
-            jointIndex=jointId,
-            controlMode=p.TORQUE_CONTROL,
-            force=passive_torque + torque,
-            physicsClientId=physicsClient,
-        )
+        if jointId not in [1, 100]:
+            p.setJointMotorControl2(
+                bodyIndex=bodyIndex,
+                jointIndex=jointId,
+                #controlMode=p.TORQUE_CONTROL,
+                controlMode=p.VELOCITY_CONTROL,
+                force=passive_torque + torque,
+                physicsClientId=physicsClient,
+            )
 
 
 def disable_joint_controllers(bodyIndex, jointIndices, forces, physicsClient):
@@ -179,7 +181,7 @@ class SMContinuumManipulator:
             baseStartPos,
             baseStartOrn,
             physicsClientId=self.physics_client,
-            #useFixedBase=0,
+            useFixedBase=1,
             flags=all_flags,
         )
         #import pdb; pdb.set_trace()
