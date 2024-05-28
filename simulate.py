@@ -45,8 +45,10 @@ StartOr = p.getQuaternionFromEuler([0, 0, 0])
 positions_c = [[-1, -1, 0.1], [0, -1, 0.1], [1, -1, 0.1], [-0.5, -2, 0.1], [0.5, -2, 0.1]]
 scale = 5
 positions_c = [[scale * i[0], scale * i[1], scale * i[2]] for i in positions_c]
-simHelper.load_cylinders(physicsClient, positions_c, [StartOr for _ in range(len(positions_c))])
+#simHelper.load_cylinders(physicsClient, positions_c, [StartOr for _ in range(len(positions_c))])
+simHelper.load_cylinders_fromfile("URDFS/obstacles/circle_locations.txt", physicsClient)
 
+#sys.exit(0)
 
 simHelper.load_container(physicsClient, [[1.05, 52, 0], [-1.05, 52, 0]], [p.getQuaternionFromEuler([0, 0, 0])] * 2)
 
@@ -75,10 +77,10 @@ finger.load_to_pybullet(
 p.changeDynamics(finger.bodyUniqueId, -1, lateralFriction=2, restitution=1)
 
 import math
-limit_range = [-math.pi/6, math.pi/6]
+limit_range = [-math.pi/12, math.pi/12]
 for i in range(p.getNumJoints(finger.bodyUniqueId)):
     p.changeDynamics(finger.bodyUniqueId, i, jointLowerLimit=limit_range[0], jointUpperLimit=limit_range[1])
-    p.setJointMotorControl2(finger.bodyUniqueId, i, controlMode=p.VELOCITY_CONTROL, maxVelocity=2)
+    p.setJointMotorControl2(finger.bodyUniqueId, i, controlMode=p.VELOCITY_CONTROL, maxVelocity=1)
     
 # Setup stuff from somo
 time_step, n_steps, sim_time = 0.001, 2000000, 0
@@ -98,7 +100,7 @@ normal_forces = normal_forces_lastLink = time_plot = np.zeros((n_steps,))
 velocity = [0.0, 0.0, 0.0]  
 velocity_mult = 20
 torque = 0
-torque_multiplier = 0.17
+torque_multiplier = 0.2
 
 # Keyboard input, will be deleted soon
 def on_press(key):
@@ -156,6 +158,8 @@ for i in range(DURATION):
     #     )
     #apply_actuation_torques(finger.bodyUniqueId, [i for i in range(joints_num)], [torque for _ in range(joints_num)], lambda x: 0, physicsClient)
     p.setJointMotorControlArray(finger.bodyUniqueId, [i for i in range(joints_num)], p.POSITION_CONTROL, targetPositions=[torque for _ in range(joints_num)])
+    #import pdb; pdb.set_trace()
+    #finger.apply_passive_spring_torques([i for i in range(20)], [0 for i in range(20)])
     
 
     p.stepSimulation()

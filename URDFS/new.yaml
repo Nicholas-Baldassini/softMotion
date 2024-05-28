@@ -11,7 +11,7 @@ actuator_definitions:
     - 1.0
     - 1.0
     - 0.5
-    mass: 0.00294
+    mass: 0.294
     inertial_values:
     - 0.0152488
     - 0

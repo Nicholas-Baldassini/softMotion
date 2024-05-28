@@ -31,6 +31,21 @@ def load_container(bullet_client, positions, orientations):
     p.changeDynamics(cyl_id, -1, lateralFriction=2, physicsClientId=bullet_client)
 
 
+def load_cylinders_fromfile(filename, physicsClient):
+    StartOr = p.getQuaternionFromEuler([0, 0, 0])
+    with open(filename, "r") as f:
+        for circ in f.readlines():
+            x, y, r = circ.strip().split(" ")
+            print(x, y, r)
+            cyl_id, boxConstraintId2 = load_constrained_urdf("./URDFS/cylinder.urdf",
+            [float(x), float(y), 0.1],
+            StartOr,
+            static=1,
+            physicsClient = physicsClient)
+            p.changeDynamics(cyl_id, -1, lateralFriction=2, physicsClientId=physicsClient)
+
+
+
 def generate_config_yaml(n_act, spacing, filename):
     yaml = ruamel.yaml.YAML()
     yaml.preserve_quotes = True
@@ -45,7 +60,7 @@ def generate_config_yaml(n_act, spacing, filename):
      "link_definition": {
          "shape_type": "stadium",
          "dimensions": [1., 1., spacing / n_segments],
-         "mass": 0.00294,
+         "mass": 0.294,
          "inertial_values": [0.0152488, 0, 0, 0.0152488, 0, 0.0152488],
          "material_color": [0.10980392156862745, 0.3843137254901961, 0.8431372549019608, 1.0],
          "material_name": "navyblue"
