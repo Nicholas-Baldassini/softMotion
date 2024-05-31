@@ -46,11 +46,11 @@ positions_c = [[-1, -1, 0.1], [0, -1, 0.1], [1, -1, 0.1], [-0.5, -2, 0.1], [0.5,
 scale = 5
 positions_c = [[scale * i[0], scale * i[1], scale * i[2]] for i in positions_c]
 #simHelper.load_cylinders(physicsClient, positions_c, [StartOr for _ in range(len(positions_c))])
-simHelper.load_cylinders_fromfile("URDFS/obstacles/circle_locations.txt", physicsClient)
+#simHelper.load_cylinders_fromfile("URDFS/obstacles/circle_locations.txt", physicsClient)
 
 #sys.exit(0)
 
-simHelper.load_container(physicsClient, [[1.05, 52, 0], [-1.05, 52, 0]], [p.getQuaternionFromEuler([0, 0, 0])] * 2)
+#simHelper.load_container(physicsClient, [[1.05, 52, 0], [-1.05, 52, 0]], [p.getQuaternionFromEuler([0, 0, 0])] * 2)
 
 
 # Use robotConfig.py
@@ -101,7 +101,7 @@ velocity = [0.0, 0.0, 0.0]
 velocity_mult = 20
 torque = 0
 torque_multiplier = 0.2
-
+#torque_multiplier = 200
 # Keyboard input, will be deleted soon
 def on_press(key):
     #global force
@@ -151,15 +151,17 @@ for i in range(DURATION):
     #print(p.getJointInfo(finger.bodyUniqueId, 50))
     # p.setJointMotorControl2(
     # bodyIndex=finger.bodyUniqueId,
-    # jointIndex=50,
+    # jointIndex=90,
     # controlMode=p.TORQUE_CONTROL,
     # force=torque,
     # physicsClientId=physicsClient,
     #     )
+    #print(p.getJointState(finger.bodyUniqueId, 90)[0])
     #apply_actuation_torques(finger.bodyUniqueId, [i for i in range(joints_num)], [torque for _ in range(joints_num)], lambda x: 0, physicsClient)
     p.setJointMotorControlArray(finger.bodyUniqueId, [i for i in range(joints_num)], p.POSITION_CONTROL, targetPositions=[torque for _ in range(joints_num)])
     #import pdb; pdb.set_trace()
     #finger.apply_passive_spring_torques([i for i in range(20)], [0 for i in range(20)])
+    
     
 
     p.stepSimulation()
@@ -167,7 +169,7 @@ for i in range(DURATION):
     
     # if torque_fns[0] < 100:
     #     torque_fns[0] += 0.01
-    print(torque, velocity)
+    #print(torque, velocity)
     #print(torque_fns[0])
     
     # At each frame apply an external force on the object
