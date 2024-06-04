@@ -5,17 +5,47 @@ import pyscreenshot as imggrab
 
 import time
 
-"xwininfo -id $(xprop -root | awk '/_NET_ACTIVE_WINDOW\(WINDOW\)/{print $NF}')"
-box=(10, 10, 510, 510)
-while True:
-    last_time = time.time()
-    im = np.array(imggrab.grab(bbox=box))
-    cv2.imshow("test", im)
-    if cv2.waitKey(25) & 0xFF == ord("q"):
-        cv2.destroyAllWindows()
-        break
+import subprocess
 
-    print(f"fps: {1 / (time.time() - last_time)}")
+
+
+
+p = subprocess.Popen("xwininfo -id $(xprop -root | awk '/_NET_ACTIVE_WINDOW\(WINDOW\)/{print $NF}')", stdout=subprocess.PIPE, shell=True)
+(output, err) = p.communicate()
+p_status = p.wait()
+val = output.decode().strip().split("\n")
+name = val[0].split("\"")[1]
+
+while "Bullet Physics" not in name:
+    time.sleep(0.7)
+    p = subprocess.Popen("xwininfo -id $(xprop -root | awk '/_NET_ACTIVE_WINDOW\(WINDOW\)/{print $NF}')", stdout=subprocess.PIPE, shell=True)
+    (output, err) = p.communicate()
+    p_status = p.wait()
+    val = output.decode().strip().split("\n")
+    name = val[0].split("\"")[1]
+    print("Not found bullet window yet")
+
+x1 = int(val[2].split(":")[-1].strip())
+y1 = int(val[3].split(":")[-1].strip())
+width = int(val[6].split(":")[-1].strip())
+height = int(val[7].split(":")[-1].strip())
+
+print(f"Found bullet window: ({x1}, {y1}, {width}, {height})")
+
+# box=(10, 10, 510, 510)
+# from fastgrab import screenshot
+# # take a full screen screenshot
+
+# while True:
+#     last_time = time.time()
+#     #im = np.array(imggrab.grab(bbox=box))
+#     img = screenshot.Screenshot().capture(bbox=box)
+#     cv2.imshow("test", img)
+#     if cv2.waitKey(25) & 0xFF == ord("q"):
+#         cv2.destroyAllWindows()
+#         break
+
+#     print(f"fps: {1 / (time.time() - last_time)}")
 
 # with mss.mss() as sct:
 #     # Part of the screen to capture
